@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 
-	// Resigter command
+	// Resigter showPythonImage command
 	let disposable = vscode.commands.registerCommand('python-image-viewer.showPythonImage', () => {
 		let var_name = getVarName();
 		console.log("var_name\n", var_name);
@@ -66,6 +66,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(disposable);
 
+
+	vscode.debug.onDidTerminateDebugSession((session) => {	
+		let pwd = vscode.workspace.workspaceFolders![0].uri;
+		let saveDir = vscode.Uri.joinPath(pwd, '.python-image-viewer');
+		vscode.workspace.fs.delete(saveDir, {recursive: true, useTrash: false});
+	});
 	// vscode.debug.onDidChangeActiveDebugSession;
 	// let dispHover = vscode.languages.registerHoverProvider('python', {
 	// 	provideHover(document, position, token) {
@@ -82,9 +88,9 @@ export function activate(context: vscode.ExtensionContext) {
 // This method is called when your extension is deactivated
 export function deactivate() {
 	// TODO: delete when deactive
-	let pwd = vscode.workspace.workspaceFolders![0].uri;
-	let saveDir = vscode.Uri.joinPath(pwd, '.python-image-viewer');
-	vscode.workspace.fs.delete(saveDir, {recursive: true, useTrash: false});
+	// let pwd = vscode.workspace.workspaceFolders![0].uri;
+	// let saveDir = vscode.Uri.joinPath(pwd, '.python-image-viewer');
+	// vscode.workspace.fs.delete(saveDir, {recursive: true, useTrash: false});
 
-	console.log("Extension deactivated.");
+	// console.log("Extension deactivated.");
 }
