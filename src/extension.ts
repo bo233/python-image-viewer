@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { getVarName, getVarType } from './utils/EvalPyUtils';
 import { saveImage } from './utils/PILUtils';
+import { getWebviewContent } from './components/ImagePanel';
 
 
 // This method is called when your extension is activated
@@ -33,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
 			// core logic
 			let var_type = await getVarType(var_name!, debugSession, frameId);
 			let pwd = vscode.workspace.workspaceFolders![0].uri;
-			let saveDir = vscode.Uri.joinPath(pwd, '__pycache__');
+			let saveDir = vscode.Uri.joinPath(pwd, '.python-image-viewer');
 			
 			try{
 				vscode.workspace.fs.createDirectory(saveDir);
@@ -46,7 +47,19 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			}
 			
-			await saveImage(var_name!, saveDir, debugSession, frameId);
+			let imgPath = await saveImage(var_name!, saveDir, debugSession, frameId);
+
+			const panel = vscode.window.createWebviewPanel(
+				'catCoding',
+				'Cat Coding',
+				vscode.ViewColumn.Beside,
+				{}
+			  );
+		
+			  // And get the special URI to use with the webview
+			  const catGifSrc = panel.webview.asWebviewUri(imgPath);
+		
+			  panel.webview.html = getWebviewContent(catGifSrc);
 		});
 
 	});
@@ -70,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	// TODO: delete when deactive
 	let pwd = vscode.workspace.workspaceFolders![0].uri;
-	let saveDir = vscode.Uri.joinPath(pwd, '__pycache__');
+	let saveDir = vscode.Uri.joinPath(pwd, '.python-image-viewer');
 	vscode.workspace.fs.delete(saveDir, {recursive: true, useTrash: false});
 
 	console.log("Extension deactivated.");

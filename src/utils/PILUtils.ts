@@ -24,8 +24,9 @@ import {evalExpr} from './EvalPyUtils';
 
 export async function saveImage(imgName: string, saveDir: vscode.Uri, debugSession: vscode.DebugSession, frameId: any) {
     // imgName.save(saveDir + '/' + imgName + '.png')
-    let savePath = vscode.Uri.joinPath(saveDir, imgName + '.png').fsPath;
-    let expr = imgName + ".save('" + savePath + "')";
+    let savePath = vscode.Uri.joinPath(saveDir, imgName + '.png');
+    let expr = imgName + ".save('" + savePath.fsPath + "')";
     let result = await evalExpr(expr, debugSession, frameId);
     console.log(result);
+    return savePath;
 }
