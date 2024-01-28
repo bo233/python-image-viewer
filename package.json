@@ -10,8 +10,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onDebug",
-    "onLanguage:star-rod-script"
+    "onDebug"
   ],
   "main": "./out/extension.js",
   "contributes": {

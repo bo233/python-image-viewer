@@ -1,6 +1,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { getVarName, getVarType } from './utils/EvalPyUtils';
+import { saveImage } from './utils/PILUtils';
+
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -14,31 +17,40 @@ export function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 
+	// Resigter command
 	let disposable = vscode.commands.registerCommand('python-image-viewer.showPythonImage', () => {
-		const editor = vscode.window.activeTextEditor;
-		if(!editor) {
+		let var_name = getVarName();
+		console.log("var_name\n", var_name);
+		if (!var_name) {
+			vscode.window.showErrorMessage("Cannot get variable name.");
 			return;
 		}
 
-		// get var name
-		let document = editor.document;
-		let var_range = document.getWordRangeAtPosition(editor.selection.active);
-		const var_name = document.getText(var_range);
-		console.log("var_name\n", var_name);
+		let debugSession = vscode.debug.activeDebugSession!;
+		debugSession?.customRequest('stackTrace', { threadId: 1 }).then(async (response) => {
+			let frameId = response.stackFrames[0].id;
 
-		let debugSession = vscode.debug.activeDebugSession;
-		debugSession?.customRequest('stackTrace', { threadId: 1 }).then((response) => {
-			const frameId = response.stackFrames[0].id;
-			debugSession?.customRequest("evaluate", {
-				expression: "print("+var_name+")", 
-				frameId: frameId
-			}).then((result) => {
-				console.log("result\n", result);
-			});
+			// core logic
+			let var_type = await getVarType(var_name!, debugSession, frameId);
+			let pwd = vscode.workspace.workspaceFolders![0].uri;
+			let saveDir = vscode.Uri.joinPath(pwd, '__pycache__');
+			
+			try{
+				vscode.workspace.fs.createDirectory(saveDir);
+			}
+			catch(err) {
+				console.log(err);
+				if (err === vscode.FileSystemError.NoPermissions) {
+					vscode.window.showErrorMessage("No permission to create temporary directory. The extension will not work.");
+					return;
+				}
+			}
+			
+			await saveImage(var_name!, saveDir, debugSession, frameId);
 		});
 
-		// console.log("debugSession\n", debugSession);
 	});
+
 	context.subscriptions.push(disposable);
 
 	// vscode.debug.onDidChangeActiveDebugSession;
@@ -55,4 +67,11 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+	// TODO: delete when deactive
+	let pwd = vscode.workspace.workspaceFolders![0].uri;
+	let saveDir = vscode.Uri.joinPath(pwd, '__pycache__');
+	vscode.workspace.fs.delete(saveDir, {recursive: true, useTrash: false});
+
+	console.log("Extension deactivated.");
+}
