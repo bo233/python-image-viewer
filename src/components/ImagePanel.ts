@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 
 
-const cats = {
-	'Coding Cat': 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif',
-	'Compiling Cat': 'https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif',
-	'Testing Cat': 'https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif'
-};
+// const cats = {
+// 	'Coding Cat': 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif',
+// 	'Compiling Cat': 'https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif',
+// 	'Testing Cat': 'https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif'
+// };
 
 
 function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
@@ -21,13 +21,13 @@ function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
 /**
  * Manages cat coding webview panels
  */
-class CatCodingPanel {
+class ImageViewerPanel {
 	/**
 	 * Track the currently panel. Only allow a single panel to exist at a time.
 	 */
-	public static currentPanel: CatCodingPanel | undefined;
+	public static currentPanel: ImageViewerPanel | undefined;
 
-	public static readonly viewType = 'catCoding';
+	public static readonly viewType = 'imageViewerPanel';
 
 	private readonly _panel: vscode.WebviewPanel;
 	private readonly _extensionUri: vscode.Uri;
@@ -39,24 +39,24 @@ class CatCodingPanel {
 			: undefined;
 
 		// If we already have a panel, show it.
-		if (CatCodingPanel.currentPanel) {
-			CatCodingPanel.currentPanel._panel.reveal(column);
+		if (ImageViewerPanel.currentPanel) {
+			ImageViewerPanel.currentPanel._panel.reveal(column);
 			return;
 		}
 
 		// Otherwise, create a new panel.
 		const panel = vscode.window.createWebviewPanel(
-			CatCodingPanel.viewType,
+			ImageViewerPanel.viewType,
 			'Cat Coding',
 			column || vscode.ViewColumn.One,
 			getWebviewOptions(extensionUri),
 		);
 
-		CatCodingPanel.currentPanel = new CatCodingPanel(panel, extensionUri);
+		ImageViewerPanel.currentPanel = new ImageViewerPanel(panel, extensionUri);
 	}
 
 	public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-		CatCodingPanel.currentPanel = new CatCodingPanel(panel, extensionUri);
+		ImageViewerPanel.currentPanel = new ImageViewerPanel(panel, extensionUri);
 	}
 
 	private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
@@ -102,7 +102,7 @@ class CatCodingPanel {
 	}
 
 	public dispose() {
-		CatCodingPanel.currentPanel = undefined;
+		ImageViewerPanel.currentPanel = undefined;
 
 		// Clean up our resources
 		this._panel.dispose();
@@ -119,26 +119,26 @@ class CatCodingPanel {
 		const webview = this._panel.webview;
 
 		// Vary the webview's content based on where it is located in the editor.
-		switch (this._panel.viewColumn) {
-			case vscode.ViewColumn.Two:
-				this._updateForCat(webview, 'Compiling Cat');
-				return;
+		// switch (this._panel.viewColumn) {
+		// 	case vscode.ViewColumn.Two:
+		// 		this._updateForCat(webview, 'Compiling Cat');
+		// 		return;
 
-			case vscode.ViewColumn.Three:
-				this._updateForCat(webview, 'Testing Cat');
-				return;
+		// 	case vscode.ViewColumn.Three:
+		// 		this._updateForCat(webview, 'Testing Cat');
+		// 		return;
 
-			case vscode.ViewColumn.One:
-			default:
-				this._updateForCat(webview, 'Coding Cat');
-				return;
-		}
+		// 	case vscode.ViewColumn.One:
+		// 	default:
+		// 		this._updateForCat(webview, 'Coding Cat');
+		// 		return;
+		// }
 	}
 
-	private _updateForCat(webview: vscode.Webview, catName: keyof typeof cats) {
-		this._panel.title = catName;
-		this._panel.webview.html = this._getHtmlForWebview(webview, cats[catName]);
-	}
+	// private _updateForCat(webview: vscode.Webview, catName: keyof typeof cats) {
+	// 	this._panel.title = catName;
+	// 	this._panel.webview.html = this._getHtmlForWebview(webview, cats[catName]);
+	// }
 
 	private _getHtmlForWebview(webview: vscode.Webview, catGifPath: string) {
 		// Local path to main script run in the webview

@@ -50,16 +50,16 @@ export function activate(context: vscode.ExtensionContext) {
 			let imgPath = await saveImage(var_name!, saveDir, debugSession, frameId);
 
 			const panel = vscode.window.createWebviewPanel(
-				'catCoding',
-				'Cat Coding',
+				'imageViewerPanel',
+				'PyImgViewer-' + var_name!,
 				vscode.ViewColumn.Beside,
 				{}
 			  );
 		
 			  // And get the special URI to use with the webview
-			  const catGifSrc = panel.webview.asWebviewUri(imgPath);
+			  const imgSrc = panel.webview.asWebviewUri(imgPath);
 		
-			  panel.webview.html = getWebviewContent(catGifSrc);
+			  panel.webview.html = getWebviewContent(imgSrc);
 		});
 
 	});
