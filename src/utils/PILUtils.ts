@@ -26,6 +26,9 @@ export async function saveImage(imgName: string, saveDir: vscode.Uri, debugSessi
     // Convert various data types to PIL Image before saving
     let savePath = vscode.Uri.joinPath(saveDir, imgName + '.png');
     
+    // Escape the path for Python (convert backslashes to forward slashes or escape them)
+    let pythonPath = savePath.fsPath.replace(/\\/g, '/');
+    
     // Build a Python script that handles conversion from various types to PIL Image
     let conversionScript = `
 try:
@@ -98,7 +101,7 @@ try:
         _img = Image.fromarray(_arr)
     
     if _img is not None:
-        _img.save('${savePath.fsPath.replace(/\\/g, '\\\\')}')
+        _img.save('${pythonPath}')
         'SUCCESS'
     else:
         'ERROR: Unsupported type'
