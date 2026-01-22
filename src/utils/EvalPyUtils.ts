@@ -49,6 +49,12 @@ export async function getVarType(
     else if (result.result.includes("PIL")) {
         var_type = VarType.PIL;
     }
+    else if (result.result.includes("torch") || result.result.includes("Tensor")) {
+        var_type = VarType.torch;
+    }
+    else if (result.result.includes("list")) {
+        var_type = VarType.list;
+    }
     else {
         var_type = VarType.others;
     }
