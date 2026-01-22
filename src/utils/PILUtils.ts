@@ -45,7 +45,7 @@ try:
         # PyTorch tensor
         _arr = _var.detach().cpu().numpy()
         # Handle different tensor shapes
-        if _arr.ndim == 4:  # Batch dimension
+        if _arr.ndim == 4:  # Batch dimension (NCHW or NHWC)
             _arr = _arr[0]  # Take first image in batch
         if _arr.ndim == 3:
             # Check if it's CHW (channels first) format
@@ -54,11 +54,13 @@ try:
             if _arr.shape[2] == 1:  # Single channel
                 _arr = _arr[:, :, 0]
         # Normalize to 0-255 if needed
-        if _arr.dtype == np.float32 or _arr.dtype == np.float64:
-            if _arr.max() <= 1.0:
+        if _arr.dtype in [np.float32, np.float64, np.float16]:
+            if _arr.max() <= 1.0 and _arr.min() >= 0.0:
                 _arr = (_arr * 255).astype(np.uint8)
             else:
-                _arr = _arr.astype(np.uint8)
+                _arr = np.clip(_arr, 0, 255).astype(np.uint8)
+        elif _arr.dtype != np.uint8:
+            _arr = _arr.astype(np.uint8)
         _img = Image.fromarray(_arr)
     # Check if it's a NumPy array
     elif isinstance(_var, np.ndarray):
@@ -73,11 +75,13 @@ try:
             if _arr.shape[2] == 1:  # Single channel
                 _arr = _arr[:, :, 0]
         # Normalize to 0-255 if needed
-        if _arr.dtype == np.float32 or _arr.dtype == np.float64:
-            if _arr.max() <= 1.0:
+        if _arr.dtype in [np.float32, np.float64, np.float16]:
+            if _arr.max() <= 1.0 and _arr.min() >= 0.0:
                 _arr = (_arr * 255).astype(np.uint8)
             else:
-                _arr = _arr.astype(np.uint8)
+                _arr = np.clip(_arr, 0, 255).astype(np.uint8)
+        elif _arr.dtype != np.uint8:
+            _arr = _arr.astype(np.uint8)
         _img = Image.fromarray(_arr)
     # Check if it's a list
     elif isinstance(_var, list):
@@ -93,11 +97,13 @@ try:
             if _arr.shape[2] == 1:  # Single channel
                 _arr = _arr[:, :, 0]
         # Normalize to 0-255 if needed
-        if _arr.dtype == np.float32 or _arr.dtype == np.float64:
-            if _arr.max() <= 1.0:
+        if _arr.dtype in [np.float32, np.float64, np.float16]:
+            if _arr.max() <= 1.0 and _arr.min() >= 0.0:
                 _arr = (_arr * 255).astype(np.uint8)
             else:
-                _arr = _arr.astype(np.uint8)
+                _arr = np.clip(_arr, 0, 255).astype(np.uint8)
+        elif _arr.dtype != np.uint8:
+            _arr = _arr.astype(np.uint8)
         _img = Image.fromarray(_arr)
     
     if _img is not None:
