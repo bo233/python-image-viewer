@@ -19,8 +19,9 @@ This extension does not need additional requirements.
 
 ## Supported Libraries
 - PIL
-<!-- - pyTorch
-- NumPy -->
+- PyTorch (tensors)
+- NumPy (arrays)
+- Python lists (nested lists representing image data)
 
 
 ## Extension Settings
